@@ -1,10 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:readsms/readsms.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -16,9 +18,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _plugin = Readsms();
-  String sms = 'no sms received';
-  String sender = 'no sms received';
-  String time = 'no sms received';
+  bool setServer = false;
+  String serverAddress = '';
 
   @override
   void initState() {
@@ -27,11 +28,8 @@ class _MyAppState extends State<MyApp> {
       if (value) {
         _plugin.read();
         _plugin.smsStream.listen((event) {
-          setState(() {
-            sms = event.body;
-            sender = event.sender;
-            time = event.timeReceived.toString();
-          });
+          //
+
         });
       }
     });
@@ -62,19 +60,80 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('SMS Server'),
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('new sms received: $sms'),
-              Text('new sms Sender: $sender'),
-              Text('new sms time: $time'),
+              Text('SMS Server: $serverAddress'),
+              SizedBox(height: 20),
+              !setServer
+                  ? OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          setServer = !setServer;
+                        });
+                      },
+                      child: Text('初始化服务器'))
+                  : Container(
+                      width: 300,
+                      child: Column(
+                        children: [
+                          TextField(
+                            decoration: InputDecoration(hintText: '请输入服务器地址'),
+                            onChanged: (value) {
+                              serverAddress = value;
+                            },
+                          ),
+                          SizedBox(height: 20),
+                          OutlinedButton(onPressed: () {
+                            setState(() {
+                              serverAddress = serverAddress;
+                              setServer = !setServer;
+                            });
+                          }, child: Text('连接服务器'))
+                        ],
+                      ),
+                    )
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+
+void sendData() async {
+  // Define the URL
+  var url = '';
+
+  // Define the JSON data
+  var jsonData = {
+    "body": "this is",
+    "sender": "qweqweqweqwe",
+    "time": "212010212"
+  };
+
+  // Encode the JSON data
+  var body = jsonEncode(jsonData);
+
+  try {
+    // Make the POST request
+    var response = await http.post(
+      url as Uri,
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+
+    // Check if the request was successful
+    if (response.statusCode == 200) {
+      print('Success! Response: ${response.body}');
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error sending data: $e');
   }
 }
