@@ -57,10 +57,6 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -75,13 +71,16 @@ func main() {
 					msg.ReplyToMessageID = update.Message.MessageID
 
 					bot.Send(msg)
-					return
+					continue
 				}
 
 				if strings.TrimSpace(update.Message.Text) == cfg.UserToken {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "验证码正确!🔑 绑定成功!🔑")
-					msg.ReplyToMessageID = update.Message.MessageID
-					bot.Send(msg)
+					_, err := bot.Send(msg)
+					if err != nil {
+						log.Println(err)
+						continue
+					}
 
 					db.Update(func(tx *bolt.Tx) error {
 						b := tx.Bucket([]byte("MyBucket"))
@@ -91,7 +90,7 @@ func main() {
 						}
 						return nil
 					})
-					return
+					continue
 				}
 
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "️🚫验证码错误!🔑请重新输入验证码!🔑")
