@@ -35,7 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err := bolt.Open("sms_db.sql", 0600, nil)
+	db, err := bolt.Open("sms_db.sql", 0777, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func main() {
 
 	app := fiber.New()
 
-	bot, err := tgbotapi.NewBotAPI("6724266048:AAH3PAHOjUIk8D906rzYGOA4b_wtRM_2g3M")
+	bot, err := tgbotapi.NewBotAPI(cfg.TelegramBotToken)
 	if err != nil {
 		log.Panic(err)
 	}
