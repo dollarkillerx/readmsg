@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _plugin = Readsms();
   bool setServer = false;
-  String serverAddress = 'http://43.135.75.195:7878/send';
+  String serverAddress = '';
 
   @override
   void initState() {
